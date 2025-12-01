@@ -30,17 +30,15 @@ router.get('/google/callback', async (req, res) => {
   try {
     const { tokens } = await oauth2Client.getToken(code);
     // tokens will contain access_token and refresh_token (on first consent)
-    // In production store tokens securely (encrypted) and associate with user
-    const db = require('../utils/db')();
+    // Tokens are now stored securely (encrypted) in MySQL database
+    const db = require('../utils/db');
     
     if (state) {
       // Update existing user's tokens (userId passed in state)
-      const user = db.get('users').find({ id: state }).value();
+      // Use silent mode since we're about to update tokens anyway (old tokens may be corrupted)
+      const user = await db.users.findById(state, true);
       if (user) {
-        db.get('users')
-          .find({ id: state })
-          .assign({ tokens, updatedAt: new Date().toISOString() })
-          .write();
+        await db.users.updateTokens(state, tokens);
         res.redirect(`http://localhost:4200/inbox?userId=${state}&updated=true`);
       } else {
         res.status(404).send('User not found');
@@ -49,11 +47,16 @@ router.get('/google/callback', async (req, res) => {
       // Create new user
       const { nanoid } = require('nanoid');
       const id = nanoid();
-      db.get('users').push({
+      await db.users.create({
         id,
         tokens,
         createdAt: new Date().toISOString()
-      }).write();
+      });
+
+      console.log(`✅ New user created with ID: ${id}`);
+      // Use count() instead of findAll() to avoid decryption warnings for old users
+      const userCount = await db.users.count();
+      console.log(`📝 Total users in database: ${userCount}`);
 
       // Send a simple page with token reference (frontend should use this id)
       res.redirect(`http://localhost:4200/inbox?userId=${id}`);
@@ -74,6 +77,31 @@ router.get('/re-auth/:userId', (req, res) => {
     state: userId // Pass userId in state to update existing user
   });
   res.json({ url, message: 'Complete OAuth flow to update permissions for existing user' });
+});
+
+// Route to get user profile (name and email)
+// Note: We don't use validateUserId here because this endpoint is used to check if user exists
+router.get('/profile/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const gmailService = require('../services/gmailService');
+    
+    // Get user profile from Gmail API and Google OAuth2
+    const profile = await gmailService.getUserProfile(userId);
+    
+    res.json({
+      name: profile.name || null,
+      email: profile.email || null
+    });
+  } catch (err) {
+    console.error('Error in /profile/:userId:', err);
+    const statusCode = err.message?.includes('not found') ? 404 : 
+                      err.message?.includes('Authentication') ? 401 : 500;
+    res.status(statusCode).json({ 
+      error: err.message || 'Failed to get user profile',
+      details: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
+  }
 });
 
 module.exports = router;

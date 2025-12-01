@@ -2,13 +2,25 @@ require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const path = require('path');
+const { ensureDatabase } = require('./utils/initDb');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Initialize database (non-blocking)
+ensureDatabase().then(success => {
+  if (success) {
+    console.log('✅ Database initialization complete');
+  } else {
+    console.warn('⚠️  Database initialization had issues, but server will continue');
+  }
+}).catch(err => {
+  console.warn('⚠️  Database initialization error:', err.message);
+});
 
 // routes
 app.use('/auth', require('./routes/auth'));
@@ -19,5 +31,6 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
+  console.log(`🚀 Server listening on port ${PORT}`);
+  console.log(`📊 Database: ${process.env.DB_NAME || 'email_reply_bot'}`);
 });

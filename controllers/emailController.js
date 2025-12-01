@@ -1,5 +1,5 @@
 const openaiService = require('../services/openaiService');
-const db = require('../utils/db')();
+const db = require('../utils/db');
 
 /**
  * classifyAndSuggest - sends email content to OpenAI to classify intent and suggest an action.
@@ -20,7 +20,7 @@ Email snippet: ${snippet}
 `;
 
   const aiResp = await openaiService.classify(prompt);
-  // store in DB
+  // store in MySQL database
   const record = {
     id: Date.now().toString(),
     userId,
@@ -29,11 +29,10 @@ Email snippet: ${snippet}
     aiResp,
     createdAt: new Date().toISOString()
   };
-  db.get('emails').push(record).write();
+  await db.emails.create(record);
 
   // try to parse JSON from model (best-effort)
- // try to parse JSON from model (best-effort)
-let parsed = {};
+  let parsed = {};
 try {
   let cleanText = aiResp;
 
