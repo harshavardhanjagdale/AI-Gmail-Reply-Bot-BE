@@ -53,16 +53,13 @@ router.get('/google/callback', async (req, res) => {
         createdAt: new Date().toISOString()
       });
 
-      console.log(`✅ New user created with ID: ${id}`);
       // Use count() instead of findAll() to avoid decryption warnings for old users
-      const userCount = await db.users.count();
-      console.log(`📝 Total users in database: ${userCount}`);
+      await db.users.count();
 
       // Send a simple page with token reference (frontend should use this id)
       res.redirect(`http://localhost:4200/inbox?userId=${id}`);
     }
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: 'OAuth callback failed' });
   }
 });
@@ -94,7 +91,6 @@ router.get('/profile/:userId', async (req, res) => {
       email: profile.email || null
     });
   } catch (err) {
-    console.error('Error in /profile/:userId:', err);
     const statusCode = err.message?.includes('not found') ? 404 : 
                       err.message?.includes('Authentication') ? 401 : 500;
     res.status(statusCode).json({ 

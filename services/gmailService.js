@@ -55,10 +55,7 @@ async function getAuthenticatedClient(userId) {
       
       // Save updated tokens back to database using the actual user ID
       await db.users.updateTokens(actualUserId, updatedTokens);
-      
-      console.log(`✅ Tokens refreshed for user: ${actualUserId}`);
     } catch (error) {
-      console.error('Error saving refreshed tokens:', error);
       // Don't throw - token refresh succeeded even if save failed
     }
   });
@@ -235,7 +232,6 @@ async function listMessagesForUser(userId) {
             internalDate // Add internal date for sorting
           };
         } catch (err) {
-          console.error(`Error fetching message ${msg.id}:`, err.message);
           return null; // Return null for failed messages, we'll filter them out
         }
       })
@@ -335,7 +331,6 @@ async function sendReply(userId, messageId, replyText) {
       }
     });
 
-    console.log(`✅ Reply sent to ${fromEmail} for thread ${threadId}`);
   } catch (err) {
     // Enhance error messages for common Gmail API errors
     if (err.code === 401 || err.message?.includes('Invalid Credentials')) {
@@ -505,7 +500,6 @@ async function getUserProfile(userId) {
       name = response.data.name || null;
       email = response.data.email || null;
     } catch (oauth2Error) {
-      console.warn('OAuth2 userinfo API failed, trying Gmail profile:', oauth2Error.message);
     }
     
     // Get email from Gmail profile (as fallback or primary source)
@@ -516,7 +510,6 @@ async function getUserProfile(userId) {
         email = gmailProfile.data.emailAddress;
       }
     } catch (gmailError) {
-      console.warn('Gmail profile API failed:', gmailError.message);
     }
     
     if (!email) {
@@ -528,7 +521,6 @@ async function getUserProfile(userId) {
       email: email
     };
   } catch (err) {
-    console.error('Error in getUserProfile:', err);
     // Enhance error messages for common errors
     if (err.code === 401 || err.message?.includes('Invalid Credentials')) {
       throw new Error('Authentication failed. Please re-authenticate your Google account.');

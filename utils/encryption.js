@@ -3,12 +3,6 @@ const crypto = require('crypto');
 // Encryption key - should be stored in environment variable in production
 // Generate a key with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
-if (!ENCRYPTION_KEY) {
-  console.warn('⚠️  WARNING: ENCRYPTION_KEY not set in environment variables!');
-  console.warn('⚠️  Using randomly generated key. This will cause decryption failures for existing encrypted data.');
-  console.warn('⚠️  Set ENCRYPTION_KEY in your .env file to use a consistent encryption key.');
-  console.warn('⚠️  Users with existing encrypted tokens will need to re-authenticate.');
-}
 const ACTUAL_ENCRYPTION_KEY = ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex');
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 16;
@@ -47,7 +41,6 @@ function encrypt(text) {
     
     return combined.toString('base64');
   } catch (error) {
-    console.error('Encryption error:', error);
     throw new Error('Failed to encrypt data');
   }
 }
@@ -81,9 +74,6 @@ function decrypt(encryptedText, silent = false) {
     
     return decrypted;
   } catch (error) {
-    if (!silent) {
-      console.error('Decryption error:', error);
-    }
     throw new Error('Failed to decrypt data');
   }
 }
@@ -122,7 +112,6 @@ function decryptObject(obj, fields = ['access_token', 'refresh_token', 'id_token
       try {
         decrypted[field] = decrypt(decrypted[field]);
       } catch (error) {
-        console.warn(`Failed to decrypt field ${field}:`, error.message);
         // Keep encrypted value if decryption fails (might be already decrypted or corrupted)
       }
     }

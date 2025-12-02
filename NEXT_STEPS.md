@@ -87,7 +87,6 @@ Check that user data is being stored:
 ```sql
 -- Connect to MySQL
 mysql -u root -p
--- Password: 1234
 
 USE email_reply_bot;
 

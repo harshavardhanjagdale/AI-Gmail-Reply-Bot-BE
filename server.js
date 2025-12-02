@@ -12,14 +12,10 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Initialize database (non-blocking)
-ensureDatabase().then(success => {
-  if (success) {
-    console.log('✅ Database initialization complete');
-  } else {
-    console.warn('⚠️  Database initialization had issues, but server will continue');
-  }
-}).catch(err => {
-  console.warn('⚠️  Database initialization error:', err.message);
+ensureDatabase().then(() => {
+  // Database initialized
+}).catch(() => {
+  // Database initialization error
 });
 
 // routes

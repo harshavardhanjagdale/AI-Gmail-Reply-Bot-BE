@@ -14,9 +14,6 @@ router.get('/list/:userId', validateUserId, async (req, res) => {
     // Suppress logging for expected decryption errors (user needs to re-authenticate)
     const isDecryptionError = err.message?.includes('Unable to decrypt tokens') || 
                               err.message?.includes('encryption key may have changed');
-    if (!isDecryptionError) {
-      console.error('Error in /list/:userId:', err);
-    }
     const statusCode = err.message?.includes('not found') ? 404 : 
                       err.message?.includes('Unable to decrypt') ? 401 : 500;
     res.status(statusCode).json({ 
@@ -37,9 +34,6 @@ router.get('/fetch/:userId/:messageId', validateEmailOwnership, async (req, res)
     // Suppress logging for expected decryption errors (user needs to re-authenticate)
     const isDecryptionError = err.message?.includes('Unable to decrypt tokens') || 
                               err.message?.includes('encryption key may have changed');
-    if (!isDecryptionError) {
-      console.error('Error in /fetch/:userId/:messageId:', err);
-    }
     const statusCode = err.message?.includes('not found') ? 404 : 
                       err.message?.includes('Permission') ? 403 :
                       err.message?.includes('Unable to decrypt') ? 401 : 500;
@@ -84,9 +78,6 @@ Output only the email reply text.`;
     // Suppress logging for expected decryption errors (user needs to re-authenticate)
     const isDecryptionError = err.message?.includes('Unable to decrypt tokens') || 
                               err.message?.includes('encryption key may have changed');
-    if (!isDecryptionError) {
-      console.error('Auto-reply generation error:', err);
-    }
     const statusCode = err.message?.includes('not found') ? 404 : 
                       err.message?.includes('Permission') ? 403 :
                       err.message?.includes('required') ? 400 :
@@ -100,39 +91,22 @@ Output only the email reply text.`;
 
 // ---- Send Reply ----
 router.post('/send/:userId/:messageId', validateEmailOwnership, async (req, res) => {
-  console.log('🔵 [DEBUG] Send Reply API called');
-  console.log('🔵 [DEBUG] Params:', { userId: req.params.userId, messageId: req.params.messageId });
-  console.log('🔵 [DEBUG] Body:', { replyText: req.body.replyText ? `${req.body.replyText.substring(0, 50)}...` : 'MISSING' });
-  
   try {
     const { userId, messageId } = req.params;
     const { replyText } = req.body;
 
     if (!replyText) {
-      console.log('🔴 [DEBUG] Error: replyText is missing');
       return res.status(400).json({ error: 'replyText is required in request body' });
     }
 
-    console.log('🔵 [DEBUG] Calling gmailService.sendReply...');
     const gmailService = require('../services/gmailService');
     await gmailService.sendReply(userId, messageId, replyText);
 
-    console.log('✅ [DEBUG] Reply sent successfully');
     res.json({ success: true, message: 'Reply sent successfully!' });
   } catch (err) {
-    console.error('🔴 [DEBUG] Send reply error caught in route handler');
-    console.error('🔴 [DEBUG] Error type:', err.constructor.name);
-    console.error('🔴 [DEBUG] Error message:', err.message);
-    console.error('🔴 [DEBUG] Error code:', err.code || err.response?.status);
-    console.error('🔴 [DEBUG] Error response data:', err.response?.data);
-    console.error('🔴 [DEBUG] Full error:', err);
-    
     // Suppress logging for expected decryption errors (user needs to re-authenticate)
     const isDecryptionError = err.message?.includes('Unable to decrypt tokens') || 
                               err.message?.includes('encryption key may have changed');
-    if (!isDecryptionError) {
-      console.error('Send reply error:', err);
-    }
     const statusCode = err.message?.includes('not found') ? 404 : 
                       err.message?.includes('Permission') ? 403 :
                       err.message?.includes('required') ? 400 :

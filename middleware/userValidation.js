@@ -33,7 +33,6 @@ async function validateUserId(req, res, next) {
     req.validatedUser = user;
     next();
   } catch (error) {
-    console.error('User validation error:', error);
     res.status(500).json({ error: 'User validation failed' });
   }
 }
@@ -69,7 +68,6 @@ async function validateEmailOwnership(req, res, next) {
     req.validatedUser = user;
     next();
   } catch (error) {
-    console.error('Email ownership validation error:', error);
     res.status(500).json({ error: 'Email ownership validation failed' });
   }
 }

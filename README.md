@@ -5,7 +5,7 @@ This backend provides:
 - Google OAuth2 login (server-side) to get Gmail access tokens.
 - Fetching email metadata and bodies from Gmail.
 - Sending email content to OpenAI to classify intent and suggest actions.
-- A lightweight local DB (lowdb) stored in `db.json`.
+- MySQL database with encrypted OAuth token storage.
 
 ## What's included
 - `server.js` - app entrypoint
@@ -17,7 +17,6 @@ This backend provides:
 - `utils/db.js` - MySQL database utilities with connection pooling
 - `utils/encryption.js` - AES-256-GCM encryption for OAuth tokens
 - `database/schema.sql` - MySQL database schema
-- `database/migrate.js` - Migration script from db.json to MySQL
 
 ## Prerequisites
 - Node.js (v14 or higher)
@@ -83,21 +82,7 @@ ENCRYPTION_KEY=your_32_byte_hex_encryption_key
 - Never commit `.env` file to version control
 - Use different encryption keys for different environments
 
-### 4. Migrate Existing Data (if upgrading from db.json)
-
-If you have existing data in `db.json`, migrate it to MySQL:
-
-```bash
-npm run migrate
-```
-
-This will:
-- Read data from `db.json`
-- Create database tables if needed
-- Encrypt and migrate OAuth tokens
-- Migrate email classification data
-
-### 5. Start the Server
+### 4. Start the Server
 
 ```bash
 # Development mode (with auto-reload)
@@ -107,7 +92,7 @@ npm run dev
 npm start
 ```
 
-### 6. Test the Application
+### 5. Test the Application
 
 Visit: `http://localhost:3000/auth/login` to start Google OAuth flow.
 
@@ -131,14 +116,6 @@ Visit: `http://localhost:3000/auth/login` to start Google OAuth flow.
 ✅ **Multi-User Isolation**: Strict user validation ensures users can only access their own data  
 ✅ **Middleware Validation**: All routes validate user existence before processing  
 ✅ **Gmail API Security**: Uses user's own OAuth tokens (Gmail API enforces ownership)  
-
-## Migration from db.json
-
-The application has been migrated from `lowdb` (JSON file) to MySQL for:
-- **Security**: Encrypted token storage
-- **Scalability**: Better performance with large datasets
-- **Production Readiness**: ACID transactions, proper indexing
-- **Multi-user Support**: Better isolation and security
 
 ## API Endpoints
 

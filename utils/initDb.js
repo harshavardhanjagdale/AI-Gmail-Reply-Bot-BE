@@ -7,8 +7,6 @@ const mysql = require('mysql2/promise');
 
 async function ensureDatabase() {
   try {
-    console.log('🔍 Checking database connection...');
-    
     // Create connection without database to create it if needed
     const tempConnection = await mysql.createConnection({
       host: process.env.DB_HOST || 'localhost',
@@ -20,7 +18,6 @@ async function ensureDatabase() {
     
     // Create database if it doesn't exist
     await tempConnection.query(`CREATE DATABASE IF NOT EXISTS ${dbName} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
-    console.log(`✅ Database '${dbName}' ready`);
     
     await tempConnection.end();
     
@@ -83,15 +80,9 @@ async function ensureDatabase() {
       }
     }
     
-    console.log('✅ Database tables ready');
-    
     await pool.end();
     return true;
   } catch (error) {
-    console.error('❌ Error initializing database:', error.message);
-    if (error.code === 'ER_ACCESS_DENIED_ERROR') {
-      console.error('💡 Check your MySQL credentials in .env file');
-    }
     return false;
   }
 }

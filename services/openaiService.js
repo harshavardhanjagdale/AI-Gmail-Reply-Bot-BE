@@ -15,7 +15,6 @@ async function classify(prompt) {
     const text = resp.choices?.[0]?.message?.content ?? resp.output?.[0]?.content ?? JSON.stringify(resp);
     return text;
   } catch (err) {
-    console.error('OpenAI classify error', err);
     return JSON.stringify({ category: 'Other', action: 'Review manually', justification: 'OpenAI error' });
   }
 }

@@ -16,9 +16,6 @@ function safeDecrypt(encryptedText, silent = false) {
     // Pass silent parameter to decrypt to suppress error logging
     return decrypt(encryptedText, silent);
   } catch (error) {
-    if (!silent) {
-      console.warn('Decryption failed for field, returning null:', error.message);
-    }
     return null;
   }
 }
