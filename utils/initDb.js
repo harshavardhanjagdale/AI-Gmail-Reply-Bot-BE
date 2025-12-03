@@ -7,17 +7,29 @@ const mysql = require('mysql2/promise');
 
 async function ensureDatabase() {
   try {
-    // Create connection without database to create it if needed
-    const tempConnection = await mysql.createConnection({
-      host: process.env.DB_HOST || 'localhost',
-      user: process.env.DB_USER || 'root',
-      password: process.env.DB_PASSWORD || ''
-    });
-    
+    const dbHost = process.env.DB_HOST || 'localhost';
+    const dbUser = process.env.DB_USER || 'root';
+    const dbPassword = process.env.DB_PASSWORD || '';
     const dbName = process.env.DB_NAME || 'email_reply_bot';
     
+    console.log('[Database Init] Attempting to connect to database...');
+    console.log('[Database Init] Host:', dbHost);
+    console.log('[Database Init] User:', dbUser);
+    console.log('[Database Init] Database:', dbName);
+    
+    // Create connection without database to create it if needed
+    const tempConnection = await mysql.createConnection({
+      host: dbHost,
+      user: dbUser,
+      password: dbPassword
+    });
+    
+    console.log('[Database Init] Connected successfully');
+    
     // Create database if it doesn't exist
+    console.log('[Database Init] Ensuring database exists...');
     await tempConnection.query(`CREATE DATABASE IF NOT EXISTS ${dbName} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
+    console.log('[Database Init] Database ensured');
     
     await tempConnection.end();
     
@@ -82,8 +94,20 @@ async function ensureDatabase() {
     }
     
     await pool.end();
+    console.log('[Database Init] Database initialization completed successfully');
     return true;
   } catch (error) {
+    console.error('[Database Init] ❌ Database initialization failed:');
+    console.error('[Database Init] Error:', error.message);
+    console.error('[Database Init] Error Code:', error.code);
+    if (error.code === 'ENOTFOUND') {
+      console.error('[Database Init] → Hostname not found. Check DB_HOST environment variable.');
+      console.error('[Database Init] → If using Railway database, make sure you\'re using the external hostname, not railway.internal');
+    } else if (error.code === 'ECONNREFUSED') {
+      console.error('[Database Init] → Connection refused. Check if database is running and accessible.');
+    } else if (error.code === 'ER_ACCESS_DENIED_ERROR') {
+      console.error('[Database Init] → Access denied. Check DB_USER and DB_PASSWORD.');
+    }
     return false;
   }
 }
