@@ -39,7 +39,7 @@ router.get('/google/callback', async (req, res) => {
       const user = await db.users.findById(state, true);
       if (user) {
         await db.users.updateTokens(state, tokens);
-        res.redirect(`http://localhost:4200/inbox?userId=${state}&updated=true`);
+        res.redirect(`https://ai-gmail-reply-bot-fe.vercel.app/inbox?userId=${state}&updated=true`);
       } else {
         res.status(404).send('User not found');
       }
@@ -57,7 +57,7 @@ router.get('/google/callback', async (req, res) => {
       await db.users.count();
 
       // Send a simple page with token reference (frontend should use this id)
-      res.redirect(`http://localhost:4200/inbox?userId=${id}`);
+      res.redirect(`https://ai-gmail-reply-bot-fe.vercel.app/inbox?userId=${id}`);
     }
   } catch (err) {
     res.status(500).json({ error: 'OAuth callback failed' });
