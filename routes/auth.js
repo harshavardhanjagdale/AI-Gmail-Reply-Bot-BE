@@ -16,6 +16,7 @@ const SCOPES = [
 
 // Frontend URL from environment variable, fallback to localhost for development
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:4200';
+console.log('FRONTEND_URL configured as:', FRONTEND_URL);
 
 router.get('/login', (req, res) => {
   const url = oauth2Client.generateAuthUrl({
@@ -42,7 +43,9 @@ router.get('/google/callback', async (req, res) => {
       const user = await db.users.findById(state, true);
       if (user) {
         await db.users.updateTokens(state, tokens);
-        res.redirect(`${FRONTEND_URL}/inbox?userId=${state}&updated=true`);
+        const redirectUrl = `${FRONTEND_URL}/inbox?userId=${state}&updated=true`;
+        console.log('Redirecting to:', redirectUrl);
+        return res.redirect(redirectUrl);
       } else {
         res.status(404).send('User not found');
       }
