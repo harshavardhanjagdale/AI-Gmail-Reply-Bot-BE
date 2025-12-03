@@ -14,6 +14,9 @@ const SCOPES = [
   'profile'
 ];
 
+// Frontend URL from environment variable, fallback to localhost for development
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:4200';
+
 router.get('/login', (req, res) => {
   const url = oauth2Client.generateAuthUrl({
     access_type: 'offline',
@@ -39,7 +42,7 @@ router.get('/google/callback', async (req, res) => {
       const user = await db.users.findById(state, true);
       if (user) {
         await db.users.updateTokens(state, tokens);
-        res.redirect(`https://ai-gmail-reply-bot-fe.vercel.app/inbox?userId=${state}&updated=true`);
+        res.redirect(`${FRONTEND_URL}/inbox?userId=${state}&updated=true`);
       } else {
         res.status(404).send('User not found');
       }
@@ -57,7 +60,7 @@ router.get('/google/callback', async (req, res) => {
       await db.users.count();
 
       // Send a simple page with token reference (frontend should use this id)
-      res.redirect(`https://ai-gmail-reply-bot-fe.vercel.app/inbox?userId=${id}`);
+      res.redirect(`${FRONTEND_URL}/inbox?userId=${id}`);
     }
   } catch (err) {
     res.status(500).json({ error: 'OAuth callback failed' });
