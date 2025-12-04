@@ -1,7 +1,5 @@
 const crypto = require('crypto');
 
-// Encryption key - should be stored in environment variable in production
-// Generate a key with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
 const ACTUAL_ENCRYPTION_KEY = ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex');
 const ALGORITHM = 'aes-256-gcm';
@@ -10,7 +8,6 @@ const SALT_LENGTH = 64;
 const TAG_LENGTH = 16;
 
 /**
- * Encrypts sensitive data (OAuth tokens)
  * @param {string} text - Plain text to encrypt
  * @returns {string} - Encrypted string (base64 encoded)
  */
@@ -46,7 +43,6 @@ function encrypt(text) {
 }
 
 /**
- * Decrypts encrypted data
  * @param {string} encryptedText - Encrypted string (base64 encoded)
  * @param {boolean} silent - If true, suppress error logging (default: false)
  * @returns {string} - Decrypted plain text
@@ -79,7 +75,6 @@ function decrypt(encryptedText, silent = false) {
 }
 
 /**
- * Encrypts an object's sensitive fields
  * @param {object} obj - Object to encrypt
  * @param {string[]} fields - Array of field names to encrypt
  * @returns {object} - Object with encrypted fields

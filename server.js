@@ -11,14 +11,10 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Initialize database (non-blocking)
 ensureDatabase().then(() => {
-  // Database initialized
 }).catch(() => {
-  // Database initialization error
 });
 
-// routes
 app.use('/auth', require('./routes/auth'));
 app.use('/gmail', require('./routes/gmail'));
 

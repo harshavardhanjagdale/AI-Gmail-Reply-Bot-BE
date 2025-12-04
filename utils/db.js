@@ -39,36 +39,13 @@ function initPool() {
     keepAliveInitialDelay: 0
   };
   
-  // Log database configuration (without password)
-  console.log('Database Configuration:');
-  console.log('  - Host:', dbConfig.host || 'NOT SET');
-  console.log('  - Port:', dbConfig.port || 'NOT SET (using default)');
-  console.log('  - User:', dbConfig.user || 'NOT SET');
-  console.log('  - Database:', dbConfig.database || 'NOT SET');
-  console.log('  - Password:', dbConfig.password ? 'SET' : 'NOT SET');
-  
-  // Warn if using Railway internal hostname on non-Railway platform
-  if (dbConfig.host && dbConfig.host.includes('railway.internal')) {
-    console.warn('⚠️  WARNING: Using Railway internal hostname. This will only work on Railway platform.');
-    console.warn('⚠️  If deployed on Render or another platform, update DB_HOST to your database\'s external hostname.');
-  }
-  
   pool = mysql.createPool(dbConfig);
   
   // Test connection
   pool.getConnection((err, connection) => {
     if (err) {
-      console.error('❌ Database connection failed:', err.message);
-      console.error('   Error code:', err.code);
-      if (err.code === 'ENOTFOUND') {
-        console.error('   → Hostname not found. Check DB_HOST environment variable.');
-      } else if (err.code === 'ECONNREFUSED') {
-        console.error('   → Connection refused. Check if database is running and accessible.');
-      } else if (err.code === 'ER_ACCESS_DENIED_ERROR') {
-        console.error('   → Access denied. Check DB_USER and DB_PASSWORD.');
-      }
+      console.error('Database connection failed:', err.message);
     } else {
-      console.log('✅ Database connection successful');
       connection.release();
     }
   });

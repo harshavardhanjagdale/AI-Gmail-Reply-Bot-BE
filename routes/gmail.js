@@ -4,16 +4,12 @@ const gmailService = require('../services/gmailService');
 const emailController = require('../controllers/emailController');
 const { validateUserId, validateEmailOwnership } = require('../middleware/userValidation');
 
-// list recent messages for a stored user id
 router.get('/list/:userId', validateUserId, async (req, res) => {
   try {
     const { userId } = req.params;
     const messages = await gmailService.listMessagesForUser(userId);
     res.json({ messages });
   } catch (err) {
-    // Suppress logging for expected decryption errors (user needs to re-authenticate)
-    const isDecryptionError = err.message?.includes('Unable to decrypt tokens') || 
-                              err.message?.includes('encryption key may have changed');
     const statusCode = err.message?.includes('not found') ? 404 : 
                       err.message?.includes('Unable to decrypt') ? 401 : 500;
     res.status(statusCode).json({ 
@@ -23,7 +19,6 @@ router.get('/list/:userId', validateUserId, async (req, res) => {
   }
 });
 
-// fetch a single message and classify
 router.get('/fetch/:userId/:messageId', validateEmailOwnership, async (req, res) => {
   try {
     const { userId, messageId } = req.params;
@@ -31,9 +26,6 @@ router.get('/fetch/:userId/:messageId', validateEmailOwnership, async (req, res)
     const result = await emailController.classifyAndSuggest(userId, message);
     res.json({ result });
   } catch (err) {
-    // Suppress logging for expected decryption errors (user needs to re-authenticate)
-    const isDecryptionError = err.message?.includes('Unable to decrypt tokens') || 
-                              err.message?.includes('encryption key may have changed');
     const statusCode = err.message?.includes('not found') ? 404 : 
                       err.message?.includes('Permission') ? 403 :
                       err.message?.includes('Unable to decrypt') ? 401 : 500;
@@ -43,20 +35,17 @@ router.get('/fetch/:userId/:messageId', validateEmailOwnership, async (req, res)
     });
   }
 });
-// ---- AI Auto Reply Draft ----
+
 router.post('/reply/:userId/:messageId', validateEmailOwnership, async (req, res) => {
   try {
     const { userId, messageId } = req.params;
     const gmailService = require('../services/gmailService');
     const openaiService = require('../services/openaiService');
 
-    // Fetch the original email message
     const message = await gmailService.getMessage(userId, messageId);
     const subject = message.subject || '';
-    // Use full body if available, otherwise fall back to snippet
     const emailContent = message.body || message.snippet || '';
 
-    // Build AI prompt
     const prompt = `
 You are an AI email assistant. Read the email below and draft a short, polite professional reply.
 
@@ -75,9 +64,6 @@ Output only the email reply text.`;
       messageId
     });
   } catch (err) {
-    // Suppress logging for expected decryption errors (user needs to re-authenticate)
-    const isDecryptionError = err.message?.includes('Unable to decrypt tokens') || 
-                              err.message?.includes('encryption key may have changed');
     const statusCode = err.message?.includes('not found') ? 404 : 
                       err.message?.includes('Permission') ? 403 :
                       err.message?.includes('required') ? 400 :
@@ -89,7 +75,6 @@ Output only the email reply text.`;
   }
 });
 
-// ---- Send Reply ----
 router.post('/send/:userId/:messageId', validateEmailOwnership, async (req, res) => {
   try {
     const { userId, messageId } = req.params;
@@ -104,9 +89,6 @@ router.post('/send/:userId/:messageId', validateEmailOwnership, async (req, res)
 
     res.json({ success: true, message: 'Reply sent successfully!' });
   } catch (err) {
-    // Suppress logging for expected decryption errors (user needs to re-authenticate)
-    const isDecryptionError = err.message?.includes('Unable to decrypt tokens') || 
-                              err.message?.includes('encryption key may have changed');
     const statusCode = err.message?.includes('not found') ? 404 : 
                       err.message?.includes('Permission') ? 403 :
                       err.message?.includes('required') ? 400 :
