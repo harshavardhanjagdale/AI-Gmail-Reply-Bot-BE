@@ -21,20 +21,3 @@ CREATE TABLE IF NOT EXISTS users (
   INDEX idx_updated_at (updated_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Emails table: Stores email classification data
-CREATE TABLE IF NOT EXISTS emails (
-  id VARCHAR(50) PRIMARY KEY,
-  user_id VARCHAR(21) NOT NULL,
-  subject VARCHAR(500),
-  snippet TEXT,
-  ai_resp TEXT,
-  category VARCHAR(100),
-  action TEXT,
-  justification TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_user_id (user_id),
-  INDEX idx_created_at (created_at),
-  INDEX idx_category (category),
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-

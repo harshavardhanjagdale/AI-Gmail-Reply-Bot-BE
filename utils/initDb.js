@@ -56,31 +56,6 @@ async function ensureDatabase() {
       }
     }
     
-    // Create emails table
-    try {
-    await pool.execute(`
-      CREATE TABLE IF NOT EXISTS emails (
-        id VARCHAR(50) PRIMARY KEY,
-        user_id VARCHAR(21) NOT NULL,
-        subject VARCHAR(500),
-        snippet TEXT,
-        ai_resp TEXT,
-        category VARCHAR(100),
-        action TEXT,
-        justification TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        INDEX idx_user_id (user_id),
-        INDEX idx_created_at (created_at),
-        INDEX idx_category (category),
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-    `);
-    } catch (err) {
-      if (!err.message.includes('already exists')) {
-        throw err;
-      }
-    }
-    
     await pool.end();
     return true;
   } catch (error) {

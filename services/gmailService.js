@@ -76,12 +76,13 @@ async function listMessagesForUser(userId) {
       throw new Error('Unable to retrieve user email address');
     }
 
-    // Step 1: get basic list - only get inbox messages, exclude sent messages
-    // Query: in:inbox -from:me means "in inbox and not from me" - this filters out sent emails and only gets inbox
+    // Step 1: get basic list - only get Primary tab emails, exclude sent messages
+    // Query: category:primary in:inbox -from:me means "Primary tab, in inbox, and not from me"
+    // This automatically excludes Promotions, Social, Updates, and Forums tabs
     const resp = await gmail.users.messages.list({ 
       userId: 'me', 
-      maxResults: 70, // Fetch more to account for filtering (some might be filtered out)
-      q: 'in:inbox -from:me' // Only inbox messages, exclude messages sent by the user
+      maxResults: 70, // Fetch enough to get 50 after filtering
+      q: 'category:primary in:inbox -from:me' // Only Primary tab inbox messages, exclude messages sent by the user
     });
     const messages = resp.data.messages || [];
 
@@ -218,6 +219,23 @@ async function listMessagesForUser(userId) {
           
           // Skip if this message is from the user (double-check)
           if (fromEmail === userEmail) {
+            return null;
+          }
+
+          // Skip no-reply emails (noreply, no-reply, donotreply, no_reply, etc.)
+          const noReplyPatterns = [
+            /noreply@/i,
+            /no-reply@/i,
+            /no_reply@/i,
+            /donotreply@/i,
+            /do-not-reply@/i,
+            /do_not_reply@/i,
+            /noreply\+/i,
+            /no-reply\+/i
+          ];
+          
+          const isNoReply = noReplyPatterns.some(pattern => pattern.test(fromEmail) || pattern.test(from));
+          if (isNoReply) {
             return null;
           }
 
