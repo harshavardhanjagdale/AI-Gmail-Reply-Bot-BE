@@ -102,11 +102,6 @@ Visit: `http://localhost:3000/auth/login` to start Google OAuth flow.
 - Stores OAuth tokens (encrypted)
 - Fields: `id`, `access_token` (encrypted), `refresh_token` (encrypted), `token_type`, `scope`, `id_token` (encrypted), `expiry_date`, `created_at`, `updated_at`
 
-### Emails Table
-- Stores email classification data
-- Fields: `id`, `user_id`, `subject`, `snippet`, `ai_resp`, `category`, `action`, `justification`, `created_at`
-- Foreign key relationship with `users` table
-
 ## Security Features
 
 ✅ **OAuth Token Encryption**: All sensitive tokens are encrypted using AES-256-GCM before storage  
@@ -131,11 +126,9 @@ Visit: `http://localhost:3000/auth/login` to start Google OAuth flow.
 ## Next Steps & Enhancements
 
 1. ✅ Secure refresh token storage (encrypted in MySQL)
-2. Frontend integration: implement Angular OAuth flow
-3. Implement webhook handlers (n8n) to push classification results
-4. Add unit tests, logging, and rate-limiters
-5. Harden CORS and add role-based access control
-6. Add database backup/restore procedures
-7. Implement connection retry logic
-8. Add database migration versioning system
+2. ✅ Frontend integration: Angular OAuth flow implemented
+3. Add unit tests, logging, and rate-limiters
+4. Harden CORS and add role-based access control
+5. Add database backup/restore procedures
+6. Implement connection retry logic
 

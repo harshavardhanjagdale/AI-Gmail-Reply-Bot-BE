@@ -135,7 +135,6 @@ SELECT id, user_id, subject, created_at FROM emails LIMIT 10;
 
 Once you've completed these steps, your application will:
 - ✅ Store user OAuth tokens securely (encrypted in MySQL)
-- ✅ Store email classifications in MySQL
 - ✅ Support multiple users with data isolation
 - ✅ Work in production-ready mode
 

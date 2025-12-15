@@ -19,9 +19,6 @@ This application is designed to support **multiple users** with **strict data is
    - Token refresh is isolated per user
 
 3. **Email Data Isolation**
-   - All emails are stored with `user_id` foreign key
-   - Users can only see emails classified for their account
-   - Gmail API enforces ownership (uses user's own OAuth tokens)
 
 4. **Middleware Validation**
    - `validateUserId`: Ensures user exists before processing requests
@@ -124,13 +121,6 @@ User A's token expires
 - `access_token` (ENCRYPTED): User's Gmail access token
 - `refresh_token` (ENCRYPTED): User's Gmail refresh token
 - Each user has isolated token storage
-
-### Emails Table
-- `id`: Email record ID
-- `user_id` (FOREIGN KEY): Links to `users.id`
-- `subject`, `snippet`, `ai_resp`: Email data
-- Foreign key ensures data integrity
-- `ON DELETE CASCADE`: If user is deleted, their emails are deleted
 
 ## Testing Multi-User Support
 
