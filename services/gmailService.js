@@ -91,6 +91,7 @@ async function listMessagesForUser(userId) {
     }
 
     // Helper function to clean email body text - removes tracking URLs, unsubscribe links, encoded data
+    // PRESERVES line breaks for proper email formatting
     const cleanBodyText = (text) => {
       if (!text) return '';
       
@@ -117,11 +118,11 @@ async function listMessagesForUser(userId) {
       text = text.replace(/--\s*\n.*$/s, '');
       text = text.replace(/^--\s*$/m, '');
       
-      // Remove lines that are mostly encoded data or tracking
+      // Remove lines that are mostly encoded data or tracking, but KEEP empty lines for paragraph breaks
       text = text.split('\n').filter(line => {
         const trimmed = line.trim();
-        // Skip empty lines
-        if (!trimmed) return false;
+        // KEEP empty lines for paragraph spacing
+        if (!trimmed) return true;
         // Skip lines that are mostly URLs (even if URL was removed, might have fragments)
         if (trimmed.match(/^[A-Za-z0-9_-]{20,}$/)) return false;
         // Skip lines with high ratio of special encoding characters (%, &, =)
@@ -130,9 +131,14 @@ async function listMessagesForUser(userId) {
         return true;
       }).join('\n');
       
-      // Remove multiple consecutive whitespace and newlines
-      text = text.replace(/\s+/g, ' ');
-      text = text.replace(/\n\s*\n/g, '\n');
+      // Only remove multiple spaces within lines, PRESERVE newlines for formatting
+      text = text.replace(/[^\S\n]+/g, ' ');
+      
+      // Collapse more than 2 consecutive newlines into 2 (paragraph break)
+      text = text.replace(/\n{3,}/g, '\n\n');
+      
+      // Remove leading/trailing whitespace from each line
+      text = text.split('\n').map(line => line.trim()).join('\n');
       
       // Remove leading/trailing whitespace
       text = text.trim();
@@ -380,6 +386,7 @@ async function getMessage(userId, messageId) {
     const snippet = resp.data.snippet || '';
     
     // Helper function to clean email body text - removes tracking URLs, unsubscribe links, encoded data
+    // PRESERVES line breaks for proper email formatting
     const cleanBodyText = (text) => {
       if (!text) return '';
       
@@ -406,11 +413,11 @@ async function getMessage(userId, messageId) {
       text = text.replace(/--\s*\n.*$/s, '');
       text = text.replace(/^--\s*$/m, '');
       
-      // Remove lines that are mostly encoded data or tracking
+      // Remove lines that are mostly encoded data or tracking, but KEEP empty lines for paragraph breaks
       text = text.split('\n').filter(line => {
         const trimmed = line.trim();
-        // Skip empty lines
-        if (!trimmed) return false;
+        // KEEP empty lines for paragraph spacing
+        if (!trimmed) return true;
         // Skip lines that are mostly URLs (even if URL was removed, might have fragments)
         if (trimmed.match(/^[A-Za-z0-9_-]{20,}$/)) return false;
         // Skip lines with high ratio of special encoding characters (%, &, =)
@@ -419,9 +426,14 @@ async function getMessage(userId, messageId) {
         return true;
       }).join('\n');
       
-      // Remove multiple consecutive whitespace and newlines
-      text = text.replace(/\s+/g, ' ');
-      text = text.replace(/\n\s*\n/g, '\n');
+      // Only remove multiple spaces within lines, PRESERVE newlines for formatting
+      text = text.replace(/[^\S\n]+/g, ' ');
+      
+      // Collapse more than 2 consecutive newlines into 2 (paragraph break)
+      text = text.replace(/\n{3,}/g, '\n\n');
+      
+      // Remove leading/trailing whitespace from each line
+      text = text.split('\n').map(line => line.trim()).join('\n');
       
       // Remove leading/trailing whitespace
       text = text.trim();

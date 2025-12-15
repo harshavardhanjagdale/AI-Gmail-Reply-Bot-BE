@@ -24,7 +24,16 @@ router.get('/fetch/:userId/:messageId', validateEmailOwnership, async (req, res)
     const { userId, messageId } = req.params;
     const message = await gmailService.getMessage(userId, messageId);
     const result = await emailController.classifyAndSuggest(userId, message);
-    res.json({ result });
+    // Include the message body and snippet in the response for proper display
+    res.json({ 
+      result,
+      message: {
+        id: message.id,
+        subject: message.subject,
+        snippet: message.snippet,
+        body: message.body
+      }
+    });
   } catch (err) {
     const statusCode = err.message?.includes('not found') ? 404 : 
                       err.message?.includes('Permission') ? 403 :
